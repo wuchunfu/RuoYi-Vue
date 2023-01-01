@@ -86,14 +86,14 @@ public class SysConfigServiceImpl implements ISysConfigService
      * @return true开启，false关闭
      */
     @Override
-    public boolean selectCaptchaOnOff()
+    public boolean selectCaptchaEnabled()
     {
-        String captchaOnOff = selectConfigByKey("sys.account.captchaOnOff");
-        if (StringUtils.isEmpty(captchaOnOff))
+        String captchaEnabled = selectConfigByKey("sys.account.captchaEnabled");
+        if (StringUtils.isEmpty(captchaEnabled))
         {
             return true;
         }
-        return Convert.toBool(captchaOnOff);
+        return Convert.toBool(captchaEnabled);
     }
 
     /**
@@ -134,6 +134,12 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public int updateConfig(SysConfig config)
     {
+        SysConfig temp = configMapper.selectConfigById(config.getConfigId());
+        if (!StringUtils.equals(temp.getConfigKey(), config.getConfigKey()))
+        {
+            redisCache.deleteObject(getCacheKey(temp.getConfigKey()));
+        }
+
         int row = configMapper.updateConfig(config);
         if (row > 0)
         {
